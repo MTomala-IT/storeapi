@@ -5,11 +5,10 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
 
-from storeapi.database import database
 
 # overwrites the .env file to set test environment
 os.environ["ENV_STATE"] = "test"
-
+from storeapi.database import database  # noqa: E402
 from storeapi.main import app  # noqa: E402
 
 
@@ -23,6 +22,8 @@ def client() -> Generator:
     yield TestClient(app)
 
 
+# after disconnecting the DB it's going to roll back everything. thanks to our settings 'config.py'
+# this will happen before each test case, connect -> yield will run test case ->then disconnect
 @pytest.fixture(autouse=True)
 async def db() -> AsyncGenerator:
     await database.connect()

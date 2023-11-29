@@ -1,18 +1,32 @@
+import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from asgi_correlation_id import CorrelationIdMiddleware
+from fastapi import FastAPI, HTTPException
+from fastapi.exception_handlers import http_exception_handler
 
 from storeapi.database import database
+from storeapi.loging_conf import configure_logging
 from storeapi.routers.post import router as post_router
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    configure_logging()
     await database.connect()
     yield
     await database.disconnect()
 
 app = FastAPI(lifespan=lifespan)
-
+app.add_middleware(CorrelationIdMiddleware)  # id for our logging
 
 app.include_router(post_router)
+
+
+#  logging some http exceptions through error handler filter
+@app.exception_handler(HTTPException)
+async def http_exception_logging(request, exc):
+    logger.error(f"HTTP exception: {exc.status_code} {exc.detail}")
+    return await http_exception_handler(request, exc)

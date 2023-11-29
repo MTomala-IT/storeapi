@@ -6,6 +6,7 @@ class UserPostIn(BaseModel):
 
 
 class UserPost(UserPostIn):
+    # allows pydantic to deal with DB roll models as they are dicts
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -17,6 +18,7 @@ class CommentIn(BaseModel):
 
 
 class Comment(CommentIn):
+    # allows pydantic to deal with DB roll models as they are dicts
     model_config = ConfigDict(from_attributes=True)
 
     id: int
