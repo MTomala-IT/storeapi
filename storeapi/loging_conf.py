@@ -60,7 +60,7 @@ def configure_logging() -> None:
                 },
                 "file": {
                     "class": "pythonjsonlogger.jsonlogger.JsonFormatter",
-                    "datefmt": "%Y-%m-%dT%H:%M:%S",
+                    "datefmt": "%Y-%m-%d T%H:%M:%S",
                     "format": "%(asctime)s %(msecs)03d %(levelname)-8s %(correlation_id)s %(name)s %(lineno)d %(message)s"
                 }
             },

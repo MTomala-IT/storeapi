@@ -8,6 +8,7 @@ from fastapi.exception_handlers import http_exception_handler
 from storeapi.database import database
 from storeapi.loging_conf import configure_logging
 from storeapi.routers.post import router as post_router
+from storeapi.routers.user import router as user_router
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ app = FastAPI(lifespan=lifespan)
 app.add_middleware(CorrelationIdMiddleware)  # id for our logging
 
 app.include_router(post_router)
+app.include_router(user_router)
 
 
 #  logging some http exceptions through error handler filter
