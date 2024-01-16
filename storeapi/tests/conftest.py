@@ -1,9 +1,10 @@
 import os
 from typing import AsyncGenerator, Generator
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
+from httpx import AsyncClient, Request, Response
 
 
 # overwrites the .env file to set test environment.
@@ -49,7 +50,33 @@ async def registered_user(async_client: AsyncClient) -> dict:
     return user_details
 
 
+# take registered user and confirm it.
 @pytest.fixture()
-async def logged_in_token(async_client: AsyncClient, registered_user: dict) -> str:
-    response = await async_client.post("/token", json=registered_user)
+async def confirmed_user(registered_user: dict) -> dict:
+    query = (
+        user_table.update()
+        .where(user_table.c.email == registered_user["email"])
+        .values(confirmed=True)
+    )
+    await database.execute(query)
+    return registered_user
+
+
+@pytest.fixture()
+async def logged_in_token(async_client: AsyncClient, confirmed_user: dict) -> str:
+    response = await async_client.post("/token", json=confirmed_user)
     return response.json()["access_token"]
+
+
+# disable mailgun sending the emails when the tests run.
+@pytest.fixture(autouse=True)
+async def mock_httpx_client(mocker):
+    mocked_client = mocker.patch("storeapi.tasks.httpx.AsyncClient")
+
+    mocked_async_client = Mock()
+    response = Response(status_code=200, content="", request=Request("POST", "//"))
+    mocked_async_client.post = AsyncMock(return_value=response)
+    # __aenter__ runs when you do Async with httpx.AsyncxClient()
+    mocked_client.return_value.__aenter__.return_value = mocked_async_client
+
+    return mocked_async_client

@@ -1,6 +1,5 @@
 ruff
 black
 isort
-httpx
 pytest
 pytest-mock

@@ -18,6 +18,8 @@ class BaseConfig(BaseSettings):
 class GlobalConfig(BaseConfig):
     DATABASE_URL: Optional[str] = None
     DB_FORCE_ROLL_BACK: bool = False
+    MAILGUN_DOMAIN: Optional[str] = None
+    MAILGUN_API_KEY: Optional[str] = None
 #    LOGTAIL_API_KEY = Optional[str] = None
 
 
